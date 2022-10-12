@@ -1,0 +1,148 @@
+﻿<h1>統一欄位格式定義及驗證設計範例</h1>
+
+<div id="AddPanel" class="card">
+    <div class="card-header">
+        新增
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.StudentID.id" class="col-form-label">{{addForm.StudentID.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control" v-model="addForm.StudentID.value" v-bind:maxlength="addForm.StudentID.maxLength" v-on:blur="Validate(addForm, 'StudentID')" v-bind:id="addForm.StudentID.id" v-bind:ref="addForm.StudentID.id">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.Name.id" class="col-form-label">{{addForm.Name.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control" v-model="addForm.Name.value" v-bind:maxlength="addForm.Name.maxLength" v-on:blur="Validate(addForm, 'Name')" v-bind:id="addForm.Name.id" v-bind:ref="addForm.Name.id">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.PID.id" class="col-form-label">{{addForm.PID.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control"  v-model="addForm.PID.value" v-bind:maxlength="addForm.PID.maxLength" v-on:blur="Validate(addForm, 'PID')" v-bind:id="addForm.PID.id" v-bind:ref="addForm.PID.id">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.Marks.id" class="col-form-label">{{addForm.Marks.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control" v-model="addForm.Marks.value" v-bind:maxlength="addForm.Marks.maxLength" v-on:blur="Validate(addForm, 'Marks')" v-bind:id="addForm.Marks.id" v-bind:ref="addForm.Marks.id">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.Email.id" class="col-form-label">{{addForm.Email.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control"  v-model="addForm.Email.value" v-bind:maxlength="addForm.Email.maxLength" v-on:blur="Validate(addForm, 'Email')" v-bind:id="addForm.Email.id" v-bind:ref="addForm.Email.id">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.Mobile.id" class="col-form-label">{{addForm.Mobile.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control"  v-model="addForm.Mobile.value" v-bind:maxlength="addForm.Mobile.maxLength" v-on:blur="Validate(addForm, 'Mobile')" v-bind:id="addForm.Mobile.id" v-bind:ref="addForm.Mobile.id">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <label v-bind:for="addForm.CreateDate.id" class="col-form-label">{{addForm.CreateDate.name}}</label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control"  v-model="addForm.CreateDate.value" v-bind:maxlength="addForm.CreateDate.maxLength" v-on:blur="Validate(addForm, 'CreateDate')" v-bind:id="addForm.CreateDate.id" v-bind:ref="addForm.CreateDate.id">
+            </div>
+        </div>
+
+    </div>
+    <div class="card-footer">
+        <button type="button" class="btn btn-primary" v-on:click="AddSave()">儲存</button>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    const app = Vue.createApp({
+        mixins: [mixin],
+        data() {
+            return {
+                addForm: {
+                    name: 'addForm'
+                    , ColumnList: ['StudentID', 'PID', 'Name', 'Marks', 'Email', 'Mobile', 'CreateDate']
+                }
+            }
+        }
+        , created() {
+            var self = this;
+
+            // 產生控制物件
+            self.CreateFormControl(self.addForm);
+
+            // 附加 ColumnDD 設定
+            self.ColumnDefines = JSON.parse('@Html.Raw(ViewData["ColumnDefines"])');
+            self.BindColumnDefine(self.addForm);
+
+            // 設定欄位必填
+            self.addForm.StudentID.required = true;
+            self.addForm.PID.required = true;
+            self.addForm.Name.required = true;
+            self.addForm.Marks.required = true;
+            self.addForm.Email.required = true;
+            self.addForm.Mobile.required = true;
+            self.addForm.CreateDate.required = true;
+        }
+        , methods: {
+            // 新增儲存
+            AddSave() {
+	            var self = this;
+
+	            // 檢查欄位是否必填
+	            let msg = self.CheckRequired(self.addForm);
+	            if (msg != '') {
+		            alert(msg);
+		            return false;
+	            }
+
+	            // 組合表單資料
+	            var postData = {};
+	            postData['StudentID'] = self.addForm.StudentID.value;
+	            postData['PID'] = self.addForm.PID.value;
+	            postData['Name'] = self.addForm.Name.value;
+	            postData['Marks'] = self.addForm.Marks.value;
+	            postData['Email'] = self.addForm.Email.value;
+	            postData['Mobile'] = self.addForm.Mobile.value;
+	            postData['CreateDate'] = self.addForm.CreateDate.value;
+
+	            // 使用 jQuery Ajax 傳送至後端
+	            $.ajax({
+		            url: '@Url.Content("~/Home/AddSave")',
+		            method: 'POST',
+		            dataType: 'json',
+		            data: { inModel: postData, __RequestVerificationToken: $('@Html.AntiForgeryToken()').val() },
+		            success: function (datas) {
+			            if (datas.ErrMsg) {
+				            alert(datas.ErrMsg);
+				            return;
+			            }
+
+			            alert(datas.ResultMsg);
+		            },
+		            error: function (err) {
+			            alert(err.status + " " + err.statusText + '\n' + err.responseText);
+		            }
+	            });
+            }
+        }
+    });
+    const vm = app.mount('#AddPanel');
+</script>
+}
